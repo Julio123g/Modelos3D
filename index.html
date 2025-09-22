@@ -86,36 +86,33 @@
             color: #333;
         }
 
-        .model-list {
+        .model-buttons {
             display: flex;
             flex-direction: column;
             gap: 5px;
-            max-height: 120px;
-            overflow-y: auto;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f9f9f9;
         }
 
-        .model-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px;
-            background: white;
+        .model-btn {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
             border-radius: 6px;
+            background: white;
+            color: #333;
             cursor: pointer;
             font-size: 12px;
+            transition: all 0.2s ease;
+            text-align: left;
         }
 
-        .model-item:hover {
-            background: #e3f2fd;
+        .model-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
         }
 
-        .model-item.selected {
+        .model-btn.active {
             background: #667eea;
             color: white;
+            border-color: #667eea;
         }
 
         .color-input {
@@ -167,8 +164,8 @@
 <body>
     <model-viewer
         id="model-viewer-element"
-        src="HunyuanR.glb"
-        alt="Modelo 3D HunyuanR"
+        src="apartment_floor_plan.glb"
+        alt="Modelo 3D"
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
@@ -183,7 +180,10 @@
         <div class="style-controls" id="style-controls">
             <div class="control-group">
                 <label>📋 Modelos:</label>
-                <div id="model-list" class="model-list"></div>
+                <div id="model-buttons" class="model-buttons">
+                    <button class="model-btn active" data-model="apartment_floor_plan.glb">apartment_floor_plan.glb</button>
+                    <button class="model-btn" data-model="HunyuanR.glb">HunyuanR.glb</button>
+                </div>
             </div>
             
             <div class="control-group">
@@ -327,7 +327,6 @@
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
-            populateModelList();
             checkARSupport();
         });
     </script>
