@@ -1,53 +1,70 @@
+
 <!DOCTYPE html>
 <html>
   <head>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+      #ar-button {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        font-size: 16px;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none; /* Se mostrará solo en dispositivos móviles con AR */
+      }
+    </style>
   </head>
-  <body style="margin: 0px; overflow: hidden;">
+  <body>
     <a-scene
-      vr-mode-ui="enabled: false;"
       renderer="logarithmicDepthBuffer: true;"
-      arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
+      vr-mode-ui="enabled: false;"
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
     >
       <a-assets>
         <a-asset-item id="modelo3d" src="apartment_floor_plan.glb"></a-asset-item>
       </a-assets>
 
-      <a-entity camera>
-        <a-entity
-          cursor
-          raycaster="objects: .raycastable; far: 100; "
-          position="0 0 -1"
-        ></a-entity>
-      </a-entity>
-
-      <a-entity ar-hit-test="target-entity: #target; hit-test-enabled: true;"></a-entity>
-
       <a-gltf-model
-        id="target"
-        gltf-model="#modelo3d"
+        id="model"
+        src="#modelo3d"
         scale="2 2 2"
-        visible="false"
+        position="0 1 -3"
+        rotation="0 45 0"
       ></a-gltf-model>
 
+      <a-entity camera position="0 1.6 0"></a-entity>
+      <a-light type="ambient" color="#888"></a-light>
+      <a-light type="directional" position="-1 1 1" color="#fdfdfd"></a-light>
     </a-scene>
-    <script>
-      const scene = document.querySelector('a-scene');
-      const targetModel = document.querySelector('#target');
-      let placed = false;
 
-      scene.addEventListener('ar-hit-test-found', function (evt) {
-        if (!placed) {
-          targetModel.setAttribute('visible', 'true');
-        }
-      });
-      scene.addEventListener('click', function (evt) {
-        if (!placed) {
-          const hit = evt.detail.intersection.point;
-          targetModel.setAttribute('position', `${hit.x} ${hit.y} ${hit.z}`);
-          placed = true;
-        }
+    <button id="ar-button">Ver en AR</button>
+
+    <script>
+      const arButton = document.getElementById('ar-button');
+      const scene = document.querySelector('a-scene');
+      const model = document.getElementById('model');
+
+      // Se usa para detectar si el dispositivo soporta WebXR para AR
+      if (navigator.xr && navigator.xr.isSessionSupported('immersive-ar')) {
+        arButton.style.display = 'block';
+      }
+
+      arButton.addEventListener('click', () => {
+        model.setAttribute('visible', 'false'); // Oculta el modelo en 3D
+        scene.setAttribute('ar-hit-test', 'enabled: true;');
+        scene.setAttribute('arjs', 'trackingMethod: best;');
+        scene.setAttribute('arjs', 'sourceType: webcam;');
+
+        // Inicia la sesión de AR
+        scene.enterAR();
       });
     </script>
   </body>
