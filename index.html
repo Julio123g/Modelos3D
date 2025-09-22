@@ -210,20 +210,6 @@
         const bgColor = document.querySelector('#bg-color');
         const lightColor = document.querySelector('#light-color');
 
-        // Lista de modelos disponibles
-        const possibleModels = [
-            'apartment_floor_plan.glb',
-            'building.glb', 
-            'floor_plan.glb',
-            'house_plan.glb',
-            'model1.glb',
-            'model2.glb',
-            'model3.glb',
-            'model4.glb',
-            'model5.glb',
-            'office_plan.glb'
-        ];
-
         let currentModel = 'apartment_floor_plan.glb';
 
         // Función para mostrar/ocultar controles
@@ -237,11 +223,50 @@
             }
         }
 
+        // Detectar automáticamente archivos .glb
+        async function detectGLBFiles() {
+            const glbFiles = [];
+            
+            // Lista base para verificar
+            const testFiles = [
+                'apartment_floor_plan.glb',
+                '5c5ece79-e52d-4bcf-b182-bebd.glb',
+                'building.glb', 
+                'floor_plan.glb',
+                'house_plan.glb',
+                'model1.glb',
+                'model2.glb',
+                'model3.glb',
+                'model4.glb',
+                'model5.glb',
+                'office_plan.glb',
+                'plan.glb',
+                'house.glb',
+                'model.glb'
+            ];
+
+            // Verificar cuales existen realmente
+            for (const file of testFiles) {
+                try {
+                    const response = await fetch(file, { method: 'HEAD' });
+                    if (response.ok) {
+                        glbFiles.push(file);
+                    }
+                } catch (error) {
+                    // Archivo no existe
+                }
+            }
+
+            // Si no encuentra ninguno, mostrar la lista completa
+            return glbFiles.length > 0 ? glbFiles : testFiles;
+        }
+
         // Poblar lista de modelos
-        function populateModelList() {
+        async function populateModelList() {
+            const availableModels = await detectGLBFiles();
             modelList.innerHTML = '';
             
-            possibleModels.forEach(modelFile => {
+            availableModels.forEach(modelFile => {
                 const modelItem = document.createElement('div');
                 modelItem.className = 'model-item';
                 if (modelFile === currentModel) {
@@ -273,6 +298,8 @@
                 
                 modelList.appendChild(modelItem);
             });
+
+            showStatusMessage(`${availableModels.length} modelos detectados`, 'info', 2000);
         }
 
         // Función para mostrar mensajes
@@ -335,8 +362,8 @@
         });
 
         // Inicializar
-        document.addEventListener('DOMContentLoaded', () => {
-            populateModelList();
+        document.addEventListener('DOMContentLoaded', async () => {
+            await populateModelList();
             checkARSupport();
         });
     </script>
