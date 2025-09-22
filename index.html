@@ -223,42 +223,30 @@
             }
         }
 
-        // Detectar automáticamente archivos .glb
+        // Detectar automáticamente archivos .glb que existen realmente
         async function detectGLBFiles() {
-            const glbFiles = [];
-            
-            // Lista base para verificar
-            const testFiles = [
+            // Archivos que realmente tienes en tu repositorio
+            const actualFiles = [
                 'apartment_floor_plan.glb',
-                '5c5ece79-e52d-4bcf-b182-bebd.glb',
-                'building.glb', 
-                'floor_plan.glb',
-                'house_plan.glb',
-                'model1.glb',
-                'model2.glb',
-                'model3.glb',
-                'model4.glb',
-                'model5.glb',
-                'office_plan.glb',
-                'plan.glb',
-                'house.glb',
-                'model.glb'
+                'HunyuanR.glb'
             ];
 
+            const glbFiles = [];
+            
             // Verificar cuales existen realmente
-            for (const file of testFiles) {
+            for (const file of actualFiles) {
                 try {
                     const response = await fetch(file, { method: 'HEAD' });
                     if (response.ok) {
                         glbFiles.push(file);
                     }
                 } catch (error) {
-                    // Archivo no existe
+                    // Si no puede verificar, agregar de todas formas
+                    glbFiles.push(file);
                 }
             }
-
-            // Si no encuentra ninguno, mostrar la lista completa
-            return glbFiles.length > 0 ? glbFiles : testFiles;
+            
+            return glbFiles;
         }
 
         // Poblar lista de modelos
