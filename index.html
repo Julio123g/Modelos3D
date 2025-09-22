@@ -108,8 +108,25 @@
             transition: border-color 0.3s ease;
         }
 
-        .color-input:hover {
+        .model-selector {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .model-selector:hover {
             border-color: #667eea;
+        }
+
+        .model-selector:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
         }
 
         .toggle-styles {
@@ -229,6 +246,13 @@
         <div class="controls">
             <div class="style-controls" id="style-controls">
                 <div class="control-group">
+                    <label for="model-selector">🏠 Seleccionar Modelo:</label>
+                    <select id="model-selector" class="model-selector">
+                        <option value="apartment_floor_plan.glb">Plano de Apartamento</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
                     <label for="bg-color">Color de Fondo:</label>
                     <input type="color" id="bg-color" class="color-input" value="#667eea">
                 </div>
@@ -259,11 +283,29 @@
                 this.styleControls = document.querySelector('#style-controls');
                 this.showStylesBtn = document.querySelector('#show-styles');
                 this.loading = document.querySelector('#loading');
+                this.modelSelector = document.querySelector('#model-selector');
+                
+                // Lista de modelos a detectar automáticamente
+                this.possibleModels = [
+                    'apartment_floor_plan.glb',
+                    'model1.glb',
+                    'model2.glb',
+                    'model3.glb',
+                    'model4.glb',
+                    'model5.glb',
+                    'house_plan.glb',
+                    'office_plan.glb',
+                    'building.glb',
+                    'floor_plan.glb'
+                ];
+                
+                this.availableModels = [];
                 
                 this.init();
             }
 
             init() {
+                this.detectAvailableModels();
                 this.setupEventListeners();
                 this.checkARSupport();
                 this.setupStyleControls();
@@ -437,6 +479,11 @@
                 const lightColor = document.getElementById('light-color');
                 const shadowColor = document.getElementById('shadow-color');
 
+                // Selector de modelo
+                this.modelSelector.addEventListener('change', (e) => {
+                    this.changeModel(e.target.value);
+                });
+
                 bgColor.addEventListener('change', (e) => {
                     document.body.style.background = `linear-gradient(135deg, ${e.target.value}, ${this.darkenColor(e.target.value, 20)})`;
                 });
@@ -485,6 +532,81 @@
 
             hideLoading() {
                 this.loading.classList.remove('show');
+            }
+
+            async detectAvailableModels() {
+                this.showStatusMessage('Detectando modelos disponibles...', 'info', 2000);
+                
+                for (const modelFile of this.possibleModels) {
+                    try {
+                        const response = await fetch(modelFile, { method: 'HEAD' });
+                        if (response.ok) {
+                            this.availableModels.push({
+                                file: modelFile,
+                                name: this.getModelDisplayName(modelFile)
+                            });
+                        }
+                    } catch (error) {
+                        // El modelo no existe, continuar con el siguiente
+                        console.log(`Modelo ${modelFile} no encontrado`);
+                    }
+                }
+
+                this.populateModelSelector();
+            }
+
+            getModelDisplayName(filename) {
+                const nameMap = {
+                    'apartment_floor_plan.glb': '🏠 Plano de Apartamento',
+                    'model1.glb': '🏢 Modelo 1',
+                    'model2.glb': '🏘️ Modelo 2', 
+                    'model3.glb': '🏭 Modelo 3',
+                    'model4.glb': '🏬 Modelo 4',
+                    'model5.glb': '🏪 Modelo 5',
+                    'house_plan.glb': '🏡 Plano de Casa',
+                    'office_plan.glb': '🏢 Plano de Oficina',
+                    'building.glb': '🏗️ Edificio',
+                    'floor_plan.glb': '📐 Plano General'
+                };
+                
+                return nameMap[filename] || `📋 ${filename.replace('.glb', '').replace('_', ' ').toUpperCase()}`;
+            }
+
+            populateModelSelector() {
+                // Limpiar selector
+                this.modelSelector.innerHTML = '';
+                
+                if (this.availableModels.length === 0) {
+                    // Si no hay modelos, agregar solo el predeterminado
+                    this.availableModels.push({
+                        file: 'apartment_floor_plan.glb',
+                        name: '🏠 Plano de Apartamento (Por defecto)'
+                    });
+                }
+                
+                // Poblar selector
+                this.availableModels.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.file;
+                    option.textContent = model.name;
+                    this.modelSelector.appendChild(option);
+                });
+
+                const modelCount = this.availableModels.length;
+                if (modelCount > 1) {
+                    this.showStatusMessage(`${modelCount} modelos encontrados`, 'info', 3000);
+                }
+            }
+
+            changeModel(modelFile) {
+                this.showLoading();
+                this.showStatusMessage(`Cargando ${this.getModelDisplayName(modelFile)}...`, 'info', 2000);
+                
+                // Cambiar el atributo src del model-viewer
+                this.modelViewer.src = modelFile;
+                
+                // Actualizar el alt text
+                this.modelViewer.alt = `Modelo 3D: ${this.getModelDisplayName(modelFile)}`;
             }
         }
 
