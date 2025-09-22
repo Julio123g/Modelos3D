@@ -1,9 +1,7 @@
-
 <!DOCTYPE html>
 <html>
   <head>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
     <style>
       #ar-button {
         position: fixed;
@@ -18,7 +16,7 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        display: none; /* Se mostrará solo en dispositivos móviles con AR */
+        display: none;
       }
     </style>
   </head>
@@ -50,20 +48,12 @@
     <script>
       const arButton = document.getElementById('ar-button');
       const scene = document.querySelector('a-scene');
-      const model = document.getElementById('model');
 
-      // Se usa para detectar si el dispositivo soporta WebXR para AR
       if (navigator.xr && navigator.xr.isSessionSupported('immersive-ar')) {
         arButton.style.display = 'block';
       }
 
       arButton.addEventListener('click', () => {
-        model.setAttribute('visible', 'false'); // Oculta el modelo en 3D
-        scene.setAttribute('ar-hit-test', 'enabled: true;');
-        scene.setAttribute('arjs', 'trackingMethod: best;');
-        scene.setAttribute('arjs', 'sourceType: webcam;');
-
-        // Inicia la sesión de AR
         scene.enterAR();
       });
     </script>
