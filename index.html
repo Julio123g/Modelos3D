@@ -8,17 +8,58 @@
             width: 100vw;
             height: 100vh;
         }
+        #ar-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <model-viewer
+        id="model-viewer-element"
         src="apartment_floor_plan.glb"
         alt="A 3D model of an apartment floor plan"
-        ar
         ar-modes="webxr"
         camera-controls
         touch-action="pan-y"
     >
     </model-viewer>
+    
+    <button id="ar-button">Ver en AR</button>
+
+    <script>
+      const arButton = document.querySelector("#ar-button");
+      const modelViewer = document.querySelector("#model-viewer-element");
+
+      arButton.addEventListener("click", () => {
+        modelViewer.activateAR();
+      });
+
+      // Show a message if AR is not supported
+      if (!modelViewer.hasAR) {
+          arButton.style.display = 'none';
+          const message = document.createElement('div');
+          message.textContent = 'Su dispositivo no soporta realidad aumentada.';
+          message.style.position = 'fixed';
+          message.style.top = '50%';
+          message.style.left = '50%';
+          message.style.transform = 'translate(-50%, -50%)';
+          message.style.padding = '10px';
+          message.style.backgroundColor = 'rgba(0,0,0,0.7)';
+          message.style.color = 'white';
+          message.style.zIndex = '1000';
+          document.body.appendChild(message);
+      }
+    </script>
 </body>
 </html>
