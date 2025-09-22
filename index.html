@@ -674,32 +674,6 @@
                     this.showStatusMessage(`Solo 1 modelo disponible`, 'info', 2000);
                 }
             }
-                
-                this.availableModels.forEach((modelFile) => {
-                    const modelItem = document.createElement('div');
-                    modelItem.className = 'model-item';
-                    if (modelFile === this.currentModel) {
-                        modelItem.classList.add('selected');
-                    }
-                    
-                    modelItem.innerHTML = `
-                        <input type="radio" name="model" value="${modelFile}" class="model-checkbox" ${modelFile === this.currentModel ? 'checked' : ''}>
-                        <span class="model-name">${modelFile}</span>
-                    `;
-                    
-                    // Agregar evento click a todo el item
-                    modelItem.addEventListener('click', () => {
-                        this.selectModel(modelFile, modelItem);
-                    });
-                    
-                    this.modelList.appendChild(modelItem);
-                });
-
-                const modelCount = this.availableModels.length;
-                if (modelCount > 1) {
-                    this.showStatusMessage(`${modelCount} modelos encontrados`, 'info', 3000);
-                }
-            }
 
             selectModel(modelFile, itemElement) {
                 // Remover selección previa
