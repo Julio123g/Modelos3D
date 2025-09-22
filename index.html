@@ -167,8 +167,8 @@
 <body>
     <model-viewer
         id="model-viewer-element"
-        src="apartment_floor_plan.glb"
-        alt="Plano 3D de apartamento"
+        src="HunyuanR.glb"
+        alt="Modelo 3D HunyuanR"
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
@@ -210,7 +210,7 @@
         const bgColor = document.querySelector('#bg-color');
         const lightColor = document.querySelector('#light-color');
 
-        let currentModel = 'apartment_floor_plan.glb';
+        let currentModel = 'HunyuanR.glb';
 
         // Función para mostrar/ocultar controles
         function toggleStyleControls() {
@@ -223,35 +223,11 @@
             }
         }
 
-        // Detectar automáticamente archivos .glb que existen realmente
-        async function detectGLBFiles() {
-            // Archivos que realmente tienes en tu repositorio
-            const actualFiles = [
-                'apartment_floor_plan.glb',
-                'HunyuanR.glb'
-            ];
-
-            const glbFiles = [];
-            
-            // Verificar cuales existen realmente
-            for (const file of actualFiles) {
-                try {
-                    const response = await fetch(file, { method: 'HEAD' });
-                    if (response.ok) {
-                        glbFiles.push(file);
-                    }
-                } catch (error) {
-                    // Si no puede verificar, agregar de todas formas
-                    glbFiles.push(file);
-                }
-            }
-            
-            return glbFiles;
-        }
+        // Lista simple de modelos disponibles
+        const availableModels = ['HunyuanR.glb'];
 
         // Poblar lista de modelos
-        async function populateModelList() {
-            const availableModels = await detectGLBFiles();
+        function populateModelList() {
             modelList.innerHTML = '';
             
             availableModels.forEach(modelFile => {
@@ -287,7 +263,7 @@
                 modelList.appendChild(modelItem);
             });
 
-            showStatusMessage(`${availableModels.length} modelos detectados`, 'info', 2000);
+            showStatusMessage(`${availableModels.length} modelo disponible`, 'info', 2000);
         }
 
         // Función para mostrar mensajes
@@ -350,8 +326,8 @@
         });
 
         // Inicializar
-        document.addEventListener('DOMContentLoaded', async () => {
-            await populateModelList();
+        document.addEventListener('DOMContentLoaded', () => {
+            populateModelList();
             checkARSupport();
         });
     </script>
