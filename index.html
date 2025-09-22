@@ -584,29 +584,96 @@
                 // Ordenar alfabéticamente la lista de posibles modelos
                 const sortedModels = [...this.possibleModels].sort();
                 
-                for (const modelFile of sortedModels) {
+                // Verificar cada modelo con un timeout más corto
+                const checkPromises = sortedModels.map(async (modelFile) => {
                     try {
-                        const response = await fetch(modelFile, { method: 'HEAD' });
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 segundos timeout
+                        
+                        const response = await fetch(modelFile, { 
+                            method: 'HEAD',
+                            signal: controller.signal,
+                            cache: 'no-cache'
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
                         if (response.ok) {
-                            this.availableModels.push(modelFile);
+                            console.log(`✅ Modelo encontrado: ${modelFile}`);
+                            return modelFile;
+                        } else {
+                            console.log(`❌ Modelo no accesible: ${modelFile} (${response.status})`);
+                            return null;
                         }
                     } catch (error) {
-                        // El modelo no existe, continuar con el siguiente
-                        console.log(`Modelo ${modelFile} no encontrado`);
+                        console.log(`❌ Error verificando ${modelFile}:`, error.message);
+                        return null;
                     }
-                }
+                });
 
-                // Si no encuentra ningún modelo, agregar el por defecto
+                // Esperar todas las verificaciones
+                const results = await Promise.allSettled(checkPromises);
+                
+                // Filtrar solo los modelos que existen
+                this.availableModels = results
+                    .filter(result => result.status === 'fulfilled' && result.value !== null)
+                    .map(result => result.value);
+
+                // Si no encuentra ningún modelo, agregar todos los de la lista (modo fallback)
                 if (this.availableModels.length === 0) {
-                    this.availableModels.push('apartment_floor_plan.glb');
+                    console.log('⚠️ No se pudieron verificar modelos, usando lista completa');
+                    this.availableModels = [...sortedModels];
                 }
 
+                console.log(`📋 Modelos disponibles:`, this.availableModels);
                 this.populateModelList();
             }
 
             populateModelList() {
                 // Limpiar lista
                 this.modelList.innerHTML = '';
+                
+                // Agregar un botón para refrescar la lista
+                const refreshButton = document.createElement('div');
+                refreshButton.className = 'model-item';
+                refreshButton.style.backgroundColor = '#e8f5e8';
+                refreshButton.style.cursor = 'pointer';
+                refreshButton.innerHTML = `
+                    <span style="color: #2e7d32; font-weight: bold;">🔄 Detectar Modelos</span>
+                `;
+                refreshButton.addEventListener('click', () => {
+                    this.availableModels = [];
+                    this.detectAvailableModels();
+                });
+                this.modelList.appendChild(refreshButton);
+                
+                this.availableModels.forEach((modelFile) => {
+                    const modelItem = document.createElement('div');
+                    modelItem.className = 'model-item';
+                    if (modelFile === this.currentModel) {
+                        modelItem.classList.add('selected');
+                    }
+                    
+                    modelItem.innerHTML = `
+                        <input type="radio" name="model" value="${modelFile}" class="model-checkbox" ${modelFile === this.currentModel ? 'checked' : ''}>
+                        <span class="model-name">${modelFile}</span>
+                    `;
+                    
+                    // Agregar evento click a todo el item
+                    modelItem.addEventListener('click', () => {
+                        this.selectModel(modelFile, modelItem);
+                    });
+                    
+                    this.modelList.appendChild(modelItem);
+                });
+
+                const modelCount = this.availableModels.length;
+                if (modelCount > 1) {
+                    this.showStatusMessage(`${modelCount} modelos encontrados`, 'info', 3000);
+                } else if (modelCount === 1) {
+                    this.showStatusMessage(`Solo 1 modelo disponible`, 'info', 2000);
+                }
+            }
                 
                 this.availableModels.forEach((modelFile) => {
                     const modelItem = document.createElement('div');
