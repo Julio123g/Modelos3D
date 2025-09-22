@@ -4,11 +4,15 @@
     <title>Visor de Modelo 3D en AR</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
         model-viewer {
             width: 100vw;
             height: 100vh;
         }
-        #ar-button {
+        .ar-button {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -16,11 +20,24 @@
             z-index: 999;
             font-size: 16px;
             padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
+            background-color: black;
+            color: blue;
+            border: 2px solid blue;
             border-radius: 5px;
             cursor: pointer;
+            display: none; /* Oculto por defecto */
+        }
+        .no-ar-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 5px;
+            z-index: 1000;
+            text-align: center;
         }
     </style>
 </head>
@@ -35,31 +52,36 @@
     >
     </model-viewer>
     
-    <button id="ar-button">Ver en AR</button>
+    <button id="ar-button" class="ar-button">Ver en mi Espacio</button>
 
     <script>
       const arButton = document.querySelector("#ar-button");
       const modelViewer = document.querySelector("#model-viewer-element");
+      let messageShown = false;
 
+      // Espera a que el visor de modelos esté listo para verificar el soporte AR
+      modelViewer.addEventListener('ar-status', (event) => {
+        if (event.detail.status === 'not-presenting' && !messageShown) {
+          // Si el estado es "no presentando", oculta el botón y muestra el mensaje
+          if (modelViewer.hasAR) {
+            arButton.style.display = 'block';
+          } else {
+            const message = document.createElement('div');
+            message.textContent = 'Su dispositivo no soporta realidad aumentada.';
+            message.classList.add('no-ar-message');
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                document.body.removeChild(message);
+            }, 5000);
+          }
+          messageShown = true;
+        }
+      });
+      
       arButton.addEventListener("click", () => {
         modelViewer.activateAR();
       });
-
-      // Show a message if AR is not supported
-      if (!modelViewer.hasAR) {
-          arButton.style.display = 'none';
-          const message = document.createElement('div');
-          message.textContent = 'Su dispositivo no soporta realidad aumentada.';
-          message.style.position = 'fixed';
-          message.style.top = '50%';
-          message.style.left = '50%';
-          message.style.transform = 'translate(-50%, -50%)';
-          message.style.padding = '10px';
-          message.style.backgroundColor = 'rgba(0,0,0,0.7)';
-          message.style.color = 'white';
-          message.style.zIndex = '1000';
-          document.body.appendChild(message);
-      }
     </script>
 </body>
 </html>
